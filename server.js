@@ -18,13 +18,29 @@ let messageClient = function (clientSocket, clientMessageObject) {
     io.to(clientSocket.id).emit('chat message', clientMessageObject);
 }
 
+let broadcastConnectedClients = function(clientMap){
+    let listOfUsers = [];
+    let user;
+    clientMap.forEach((objectReference, key) => {
+        let socketItselt = objectReference.socket;
+        let socketId = key;
+        user = clientMap.get(socketId).userName;
+        //user = user.userName
+        console.log(`user: ${user}`);
+        listOfUsers.push(user);        
+    })
+    console.dir(listOfUsers);
+    io.emit('connected clients', {listOfUsers: listOfUsers});
+}
+
 io.on('connection', function (socket) {
     //Assign temp username and add to clientMap
     let tempUsername = "User-" + Math.floor(Math.random() * (100000 - 1 + 1)) + 1;
     clientMap.set(socket.id, { socket: socket, userName: tempUsername });
 
     //send recently connected user their temp username
-    io.to(socket.id).emit('tempUsername', { tempUsername: tempUsername })
+    io.to(socket.id).emit('tempUsername', { tempUsername: tempUsername });
+    broadcastConnectedClients(clientMap);
     //Let clients know number of users online
     clientMap.forEach((objectReference, key) => {
         let socketItselt = objectReference.socket;
@@ -45,8 +61,10 @@ io.on('connection', function (socket) {
 
     //Let clients know which user disconnected and remove him from the array
     socket.on('disconnect', function () {
+        io.emit('cut off typing', {});
         io.emit('chat message', { message: `${clientMap.get(socket.id).userName} has disconnected!` });
         clientMap.delete(socket.id);
+        broadcastConnectedClients(clientMap);
     })
 
     //Check for incomming chat messages and re-emit them
@@ -62,6 +80,7 @@ io.on('connection', function (socket) {
     socket.on('usernameUpdated', function (user) {
         io.emit('chat message', { message: `${clientMap.get(socket.id).userName} is now ${user.nickName}` })
         clientMap.set(socket.id, { socket: socket, userName: user.nickName });
+        broadcastConnectedClients(clientMap);
     })
 
     //Notify clients except for current client that someone is typing
