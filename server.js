@@ -63,6 +63,29 @@ io.on('connection', function (socket) {
         io.emit('chat message', { message: `${clientMap.get(socket.id).userName} is now ${user.nickName}` })
         clientMap.set(socket.id, { socket: socket, userName: user.nickName });
     })
+
+    //Notify clients except for current client that someone is typing
+    socket.on('someone is typing', function () {
+        console.log('someone is typing!')
+        clientMap.forEach((objectReference, key) => {
+            let socketItselt = objectReference.socket;
+            let socketId = key;
+            if (socketId !== socket.id) {
+                io.to(socketItselt.id).emit('someone is typing', {});
+            }
+        })
+    })
+
+    socket.on('cut off typing', function () {
+        console.log('cut off typing!')
+        clientMap.forEach((objectReference, key) => {
+            let socketItselt = objectReference.socket;
+            let socketId = key;
+            if (socketId !== socket.id) {
+                io.to(socketItselt.id).emit('cut off typing', {});
+            }
+        })
+    })
 })
 
 //Listen on port
