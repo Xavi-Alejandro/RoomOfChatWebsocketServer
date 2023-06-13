@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require ('cors');
 const app = express();
-app.use(cors());
+
 const HTTP_PORT = process.env.PORT || 8080;
 
 //Keep track of date and time
@@ -11,7 +11,7 @@ let http = require('http').Server(app);
 const io = require('socket.io')(http, {
     cors: {
         origin: "*",
-        credentials: true
+        methods: ["GET", "POST"]
     }
 });
 //Add a map of all clients
