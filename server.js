@@ -7,7 +7,9 @@ const HTTP_PORT = process.env.PORT || 8080;
 //Setup socket.io
 let http = require('http').Server(app);
 const io = require('socket.io')(http, {
-    cors: {}
+    cors: {
+        origin: "https://spontaneous-manatee-291ab8.netlify.app"
+    }
 });
 //Add a map of all clients
 let clientMap = new Map();
