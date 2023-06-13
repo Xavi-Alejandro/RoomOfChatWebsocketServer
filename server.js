@@ -8,7 +8,10 @@ const HTTP_PORT = process.env.PORT || 8080;
 let http = require('http').Server(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: '*'
+        origin: '*',
+        methods: ["GET", "POST"],
+        allowedHeaders: ["*"],
+        Credentials: false
     }
 });
 //Add a map of all clients
